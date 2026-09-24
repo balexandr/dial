@@ -57,22 +57,39 @@ open).
 
 1. Pick a target word for the day (seeded per dateKey, same PRNG
    convention as every generator in the suite) from a curated
-   length-bucketed word bank (`scripts/words.mjs`).
+   length-bucketed word bank (`scripts/words.mjs`) — this bank is the
+   pool *targets* are drawn from, so answers stay guessable common
+   words, not obscure ones.
 2. For each letter position, build a candidate ring: the correct letter
-   plus K-1 random decoy letters (distinct, excluding the correct one).
+   plus K-1 decoy letters (distinct, excluding the correct one).
 3. Brute-force enumerate the full K^N combination space (every ring is
-   exactly N letters, so only the N-letter bucket of the word bank can
-   ever collide) and check each string against it — a decoy set is only
-   truly safe if it doesn't happen to spell some *other* word from the
-   bank by accident. Regenerate the decoy set if uniqueness fails. Same
-   "generate then verify, never ship unproven" discipline as every other
-   NoodleGame's generator — see Realm's and the original Sift draft's
-   generate-puzzles.mjs for precedent. Note this checks uniqueness
-   against the curated word bank, not an exhaustive dictionary — a decoy
-   combination could in principle spell some obscure real word outside
-   the bank, but since the bank is exactly the pool of words a player
-   could plausibly be expected to guess from, that's the right practical
-   scope for "unique," not a gap.
+   exactly N letters, so only the N-letter bucket can ever collide) and
+   check every combination against **a real ~33k-word dictionary**
+   (`scripts/dictionary.json`, filtered from the system dictionary and
+   bundled into the repo so generation doesn't depend on any one
+   machine having it, unioned with the curated bank so the target word
+   itself is always recognized). Never ship unless exactly one
+   combination matches.
+
+   **This used to check uniqueness only against the curated word bank**,
+   reasoned at the time to be "the right practical scope, not a gap."
+   That was wrong, caught immediately by real testing: the very first
+   live puzzle (ALONE) also spelled **ALTAR** from the same rings — a
+   genuine second solution, since ALTAR was never a candidate *target*
+   so it was never checked against. A decoy set that only avoids
+   colliding with ~190 curated words per length is nowhere near "avoids
+   colliding with any real word a player would recognize." Fixed by
+   checking against the real dictionary instead.
+
+   That fix broke the original "reroll everything and hope" search —
+   against a ~33k-word collision set, random rerolls essentially never
+   converged (confirmed empirically: it ran clean through 179 of 180
+   days and then hung on one). Replaced with targeted repair: find one
+   spurious real word the rings still spell, and mutate the *specific*
+   decoy letter that word depends on, rather than re-rolling every ring
+   from scratch. Converges in a handful of iterations instead of
+   thousands, same "fix the specific thing that's wrong" spirit as
+   Sift's clue-reduction pass.
 4. Ship only the ring contents and the solution's per-wheel indices —
    no dictionary needs to reach the client at runtime, the uniqueness
    proof already happened offline (same pattern as Realm: the client
