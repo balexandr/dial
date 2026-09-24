@@ -1,0 +1,110 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0a141c;
+  --bg-surface: #0f1e28;
+  --surface: #142a36;
+  --surface-hover: #1b3644;
+  --surface-elevated: #234352;
+  --text: #eaf5fb;
+  --text-secondary: #9dc3d6;
+  --text-dim: #567988;
+  --accent: #0ea5e9;
+  --accent-hover: #38bdf8;
+  --accent-subtle: rgba(14, 165, 233, 0.16);
+  --accent-glow: rgba(14, 165, 233, 0.32);
+  --correct: #38bdf8;
+  --correct-subtle: rgba(56, 189, 248, 0.12);
+  --wrong: #fb7185;
+  --wrong-subtle: rgba(251, 113, 133, 0.1);
+  --border: rgba(157, 195, 214, 0.1);
+  --border-hover: rgba(157, 195, 214, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.6);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* A vault door lit from below: dark blue-black base, a soft glow rising
+   from the wheels, faint scattered highlights like light off brushed
+   metal. */
+body {
+  background-color: #060d13;
+  background-image:
+    radial-gradient(ellipse at 50% 110%, rgba(14, 165, 233, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 0%, rgba(56, 189, 248, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 22px 16px, rgba(157, 195, 214, 0.06) 1.2px, transparent 1.6px),
+    radial-gradient(circle at 9px 34px, rgba(157, 195, 214, 0.05) 1px, transparent 1.4px),
+    linear-gradient(180deg, #0a141c 0%, #05090d 100%);
+  background-size: auto, auto, 38px 38px, 38px 38px, auto;
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 100%, rgba(14, 165, 233, 0.08) 0%, transparent 50%);
+  animation: dialPulse 5s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes dialPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+button {
+  font-family: var(--font);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}

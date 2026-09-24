@@ -1,0 +1,95 @@
+.cryptex {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+
+.wheel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.arrow {
+  width: 40px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.arrow:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.arrow:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.arrow:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.letterWindow {
+  width: 52px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.letter {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: var(--text);
+  animation: tickIn 0.18s ease-out;
+}
+
+@keyframes tickIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Each wheel locks in with a staggered delay (set inline per wheel index)
+   so it reads left-to-right like real cryptex tumblers clicking into
+   place, before the win screen appears. */
+.letterWindowSolved {
+  border-color: var(--correct);
+  background: var(--correct-subtle);
+  box-shadow: 0 0 14px var(--accent-glow), inset 0 2px 6px rgba(0, 0, 0, 0.25);
+  animation: lockIn 0.32s ease-out both;
+}
+
+.letterWindowSolved .letter {
+  color: var(--correct);
+}
+
+@keyframes lockIn {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 420px) {
+  .letterWindow { width: 44px; height: 56px; }
+  .letter { font-size: 1.6rem; }
+  .arrow { width: 34px; }
+}
