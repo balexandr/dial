@@ -59,14 +59,4 @@ of decoy letters per position, then brute-forces every combination in
 the ring space to prove exactly one of them spells a word — checked
 against a real ~33k-word dictionary (`scripts/dictionary.json`, bundled
 into the repo, unioned with the curated bank), not just the curated
-bank itself. An earlier version only checked against the ~190-word
-bank per length, which missed real words outside it entirely: the
-first live puzzle (ALONE) also spelled ALTAR from the same rings, a
-genuine second solution nobody caught until real testing found it. See
-[GAME_DESIGN.md](./GAME_DESIGN.md) for the full story, including why
-"reroll everything and retry" had to become targeted single-letter
-repair once the collision set got that much bigger.
-
-This is the second concept built this cycle; the first (Sift, a
-logic-grid deduction game) was built, verified working, then rejected
-on sight and deleted.
+bank itself, so no puzzle ever ships with more than one valid answer.
