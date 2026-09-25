@@ -1,4 +1,4 @@
-# Dial — Daily Cryptex Word Puzzle
+# Dial: Daily Cryptex Word Puzzle
 
 A daily cryptex puzzle: a handful of letter wheels, each with a small
 set of candidate letters, one true word to spell by spinning them into
@@ -11,11 +11,11 @@ Part of the [NoodleGames](https://noodlegames.co) family alongside **Tandem** an
 ## How to play
 
 Tap the arrows on a wheel to cycle it through its own small ring of
-candidate letters — never the full alphabet. Only one combination
+candidate letters, never the full alphabet. Only one combination
 across every wheel spells a real word.
 
 - No clue list, no rules to read beyond what's on the wheels themselves.
-- No submit button — the puzzle locks in the instant every wheel shows
+- No submit button: the puzzle locks in the instant every wheel shows
   the correct letter at once.
 - Free retry forever. There's no fail state and no penalty for spinning
   back and forth; the whole game is pattern-matching, not risk
@@ -26,7 +26,7 @@ across every wheel spells a real word.
 
 ## Scoring
 
-Solve time only — no penalty for spinning. The timer starts on your
+Solve time only, no penalty for spinning. The timer starts on your
 first spin.
 
 ---
@@ -56,7 +56,7 @@ Puzzles are generated, not hand-written: `scripts/generate-puzzles.mjs`
 draws a target word from a curated bank (`scripts/words.mjs`, no
 repeats until a whole length-bucket is exhausted), builds a small ring
 of decoy letters per position, then brute-forces every combination in
-the ring space to prove exactly one of them spells a word — checked
+the ring space to prove exactly one of them spells a word, checked
 against a real ~33k-word dictionary (`scripts/dictionary.json`, bundled
 into the repo, unioned with the curated bank), not just the curated
 bank itself, so no puzzle ever ships with more than one valid answer.
