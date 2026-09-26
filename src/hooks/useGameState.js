@@ -30,11 +30,28 @@ function saveState(state) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
 }
 
+// One wheel per day starts already dialed to its correct letter and locked
+// there, so a fresh cryptex isn't six blank guesses with no way in — the
+// position is picked deterministically from the date so it's the same
+// freebie for everyone playing that day.
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}
+
+function gimmePosForDate(dateKey, n) {
+  return hashString(dateKey) % n;
+}
+
 export function useGameState() {
   const dateKey = getTodayKey();
   const puzzle = puzzles[dateKey] || null;
   const puzzleNumber = Math.floor((new Date(dateKey) - new Date(EPOCH)) / 86400000) + 1;
   const fingerprint = puzzle ? contentFingerprint(puzzle) : null;
+  const gimmePos = puzzle ? gimmePosForDate(dateKey, puzzle.n) : -1;
 
   // Index into each wheel's ring array — the wheel's current letter.
   const [selections, setSelectionsState] = useState([]);
@@ -63,7 +80,9 @@ export function useGameState() {
 
     const saved = loadState(dateKey, fingerprint);
     if (saved && saved.selections && saved.selections.length === puzzle.n) {
-      setSelectionsState(saved.selections);
+      const restored = [...saved.selections];
+      restored[gimmePos] = puzzle.solution[gimmePos];
+      setSelectionsState(restored);
       setGameStatus(saved.gameStatus || 'playing');
       elapsedRef.current = saved.elapsedSeconds || 0;
       setElapsedSeconds(elapsedRef.current);
@@ -71,7 +90,9 @@ export function useGameState() {
         setTimerRunning(true);
       }
     } else {
-      setSelectionsState(new Array(puzzle.n).fill(0));
+      const fresh = new Array(puzzle.n).fill(0);
+      fresh[gimmePos] = puzzle.solution[gimmePos];
+      setSelectionsState(fresh);
     }
     setInitialized(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,7 +121,7 @@ export function useGameState() {
   // Rotate a wheel by +1/-1, wrapping around its ring. Free retry forever,
   // no fail state, no guess penalty — same as every other NoodleGame.
   const rotateWheel = useCallback((pos, direction) => {
-    if (gameStatus !== 'playing' || !puzzle) return;
+    if (gameStatus !== 'playing' || !puzzle || pos === gimmePos) return;
     setTimerRunning(true);
     setSelectionsState((prev) => {
       const next = [...prev];
@@ -108,7 +129,18 @@ export function useGameState() {
       next[pos] = ((next[pos] + direction) % size + size) % size;
       return next;
     });
-  }, [gameStatus, puzzle]);
+  }, [gameStatus, puzzle, gimmePos]);
+
+  // Spin every wheel to a random letter at once, so a fresh puzzle doesn't
+  // just show four identical "first letter" windows — gives the player a
+  // feel for the range of letters in play before they start solving.
+  const shuffleAll = useCallback(() => {
+    if (gameStatus !== 'playing' || !puzzle) return;
+    setTimerRunning(true);
+    setSelectionsState((prev) => prev.map((val, pos) => (
+      pos === gimmePos ? val : Math.floor(Math.random() * puzzle.rings[pos].length)
+    )));
+  }, [gameStatus, puzzle, gimmePos]);
 
   const generateShareText = useCallback(() => {
     if (!puzzle || gameStatus !== 'won') return '';
@@ -123,7 +155,9 @@ export function useGameState() {
     puzzleNumber,
     initialized,
     selections,
+    gimmePos,
     rotateWheel,
+    shuffleAll,
     gameStatus,
     elapsedSeconds,
     timerRunning,

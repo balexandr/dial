@@ -19,7 +19,9 @@ export default function App() {
     puzzleNumber,
     initialized,
     selections,
+    gimmePos,
     rotateWheel,
+    shuffleAll,
     gameStatus,
     elapsedSeconds,
     timerRunning,
@@ -162,6 +164,23 @@ export default function App() {
             <span className={styles.metaLabel}>Letters</span>
             <span className={styles.metaValue}>{puzzle.n}</span>
           </div>
+          <button
+            type="button"
+            className={styles.shuffleButton}
+            onClick={shuffleAll}
+            disabled={gameStatus !== 'playing'}
+            aria-label="Shuffle all wheels"
+          >
+            <svg className={styles.shuffleIcon} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M17 3h4v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M21 3l-6.5 6.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M3 21l5.5-5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M17 21h4v-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M21 21l-5.5-5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M3 3l4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Shuffle
+          </button>
         </div>
 
         <p className={styles.prompt}>Spin each wheel to spell the hidden word.</p>
@@ -171,11 +190,12 @@ export default function App() {
           selections={selections}
           onRotate={rotateWheel}
           gameStatus={gameStatus}
+          gimmePos={gimmePos}
         />
 
         {gameStatus === 'playing' && (
           <p className={styles.hint}>
-            Each wheel only has a few letters on it — one of them is right. No penalty for spinning.
+            One wheel starts on its correct letter for free. Each of the rest only has a few letters on it, one of them is right. No penalty for spinning.
           </p>
         )}
       </main>
