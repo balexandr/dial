@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { IconClose, IconCheckmark, IconShare, IconTrophy, IconLock, IconUnlock, IconKey } from './Icons';
 import styles from './WinScreen.module.css';
 
 function getTimeToMidnight() {
@@ -20,13 +21,13 @@ function formatTime(s) {
   return `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
 }
 
-// Flat thresholds for a v1 — tune after playtesting, same as every other
+// Flat thresholds for a v1, tune after playtesting, same as every other
 // NoodleGame's first-cut rating scale.
 function getRating(seconds) {
-  if (seconds < 30) return { emoji: '🏆', label: 'Perfect Combination' };
-  if (seconds < 90) return { emoji: '🔐', label: 'Cracked It' };
-  if (seconds < 180) return { emoji: '🔓', label: 'Unlocked' };
-  return { emoji: '🗝️', label: 'Picked The Lock' };
+  if (seconds < 30) return { Icon: IconTrophy, label: 'Perfect Combination' };
+  if (seconds < 90) return { Icon: IconLock, label: 'Cracked It' };
+  if (seconds < 180) return { Icon: IconUnlock, label: 'Unlocked' };
+  return { Icon: IconKey, label: 'Picked The Lock' };
 }
 
 export default function WinScreen({ puzzle, puzzleNumber, elapsedSeconds, generateShareText, stats, winPct, onDismiss }) {
@@ -82,10 +83,10 @@ export default function WinScreen({ puzzle, puzzleNumber, elapsedSeconds, genera
         </div>
 
         <div className={styles.resultHeader}>
-          <button className={styles.dismissBtn} onClick={onDismiss} aria-label="Close">✕</button>
-          <span className={styles.ratingEmoji}>{rating.emoji}</span>
+          <button className={styles.dismissBtn} onClick={onDismiss} aria-label="Close"><IconClose /></button>
+          <span className={styles.ratingEmoji}><rating.Icon size={40} /></span>
           <h2 className={styles.title}>{rating.label}!</h2>
-          <p className={styles.subtitle}>Dial #{puzzleNumber} — {puzzle.word}</p>
+          <p className={styles.subtitle}>Dial #{puzzleNumber}, {puzzle.word}</p>
         </div>
 
         <div className={styles.metricsRow}>
@@ -137,7 +138,7 @@ export default function WinScreen({ puzzle, puzzleNumber, elapsedSeconds, genera
           className={`${styles.shareButton} ${copied ? styles.copied : ''}`}
           onClick={handleShare}
         >
-          {copied ? '✓ Copied to clipboard' : '⬆ Share your result'}
+          {copied ? <><IconCheckmark /> Copied to clipboard</> : <><IconShare /> Share your result</>}
         </button>
 
         <div className={styles.countdown}>

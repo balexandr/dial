@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { IconSpin, IconBrain, IconLock } from './Icons';
 import styles from './HowToPlay.module.css';
 
-// A tiny illustrative 4-letter example — purely for teaching the mechanic,
+// A tiny illustrative 4-letter example, purely for teaching the mechanic,
 // not pulled from a real generated puzzle.
 const EX_RINGS = [
   ['B', 'D', 'R', 'S'],
@@ -35,30 +36,30 @@ export default function HowToPlay({ onClose }) {
 
         <div className={styles.steps}>
           <div className={styles.step}>
-            <span className={styles.stepIcon}>🔄</span>
+            <span className={styles.stepIcon}><IconSpin /></span>
             <div>
               <p className={styles.stepTitle}>Spin each wheel</p>
-              <p className={styles.stepDesc}>Tap the arrows to cycle a wheel through its own small set of candidate letters — never the whole alphabet.</p>
+              <p className={styles.stepDesc}>Tap the arrows to cycle a wheel through its own small set of candidate letters, never the whole alphabet.</p>
             </div>
           </div>
           <div className={styles.step}>
-            <span className={styles.stepIcon}>🧠</span>
+            <span className={styles.stepIcon}><IconBrain /></span>
             <div>
               <p className={styles.stepTitle}>Think in words, not letters</p>
               <p className={styles.stepDesc}>Only one combination across every wheel spells a real word. Try plausible combinations until one clicks.</p>
             </div>
           </div>
           <div className={styles.step}>
-            <span className={styles.stepIcon}>🔐</span>
+            <span className={styles.stepIcon}><IconLock /></span>
             <div>
               <p className={styles.stepTitle}>It solves itself</p>
-              <p className={styles.stepDesc}>The puzzle locks in the instant every wheel shows the correct letter at once — no submit button, spin as much as you like.</p>
+              <p className={styles.stepDesc}>The puzzle locks in the instant every wheel shows the correct letter at once, no submit button, spin as much as you like.</p>
             </div>
           </div>
         </div>
 
         <div className={styles.example}>
-          <p className={styles.exampleLabel}>Try it — spin to BAKE</p>
+          <p className={styles.exampleLabel}>Try it, spin to BAKE</p>
           <div className={styles.exCryptex}>
             {EX_RINGS.map((ring, pos) => (
               <div key={pos} className={styles.exWheel}>
@@ -71,7 +72,7 @@ export default function HowToPlay({ onClose }) {
             ))}
           </div>
           <p className={styles.exampleCaption}>
-            {exSolved ? 'That\'s it — every real puzzle locks in exactly the same way.' : 'Spin each wheel — only one letter per wheel is correct.'}
+            {exSolved ? 'That\'s it, every real puzzle locks in exactly the same way.' : 'Spin each wheel, only one letter per wheel is correct.'}
           </p>
         </div>
 
