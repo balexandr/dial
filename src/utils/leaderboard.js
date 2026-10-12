@@ -37,10 +37,20 @@ export async function fetchTodayBoard(gameId, dateKey) {
   if (!supabase) return { rows: [], config: null }
   const [{ data: config }, { data: rows }] = await Promise.all([
     supabase.from('leaderboard_games').select('sort_direction, tiebreak_direction').eq('game_id', gameId).single(),
-    supabase.from('leaderboard_scores').select('initials, score, tiebreak, score_display').eq('game_id', gameId).eq('date', dateKey),
+    supabase.from('leaderboard_scores').select('device_id, initials, score, tiebreak, score_display').eq('game_id', gameId).eq('date', dateKey),
   ])
   if (!config) return { rows: [], config: null }
   return { rows: sortRows(rows || [], config), config }
+}
+
+// This device's own row in today's board, if it's already submitted
+// one — used to skip the initials prompt entirely on a repeat visit
+// instead of re-asking just because the board still has fewer than 10
+// entries (wouldQualify alone can't tell "you're already on it" from
+// "there's room for you").
+export function findMyRow(gameId, rows) {
+  const deviceId = getDeviceId(gameId)
+  return rows.find((r) => r.device_id === deviceId) || null
 }
 
 export async function submitScore(gameId, { score, tiebreak = null, scoreDisplay, initials }) {

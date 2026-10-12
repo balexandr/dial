@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchTodayBoard, submitScore, wouldQualify } from '../utils/leaderboard';
+import { fetchTodayBoard, submitScore, wouldQualify, findMyRow } from '../utils/leaderboard';
 import { IconClose, IconTrophy } from './Icons';
 import styles from './LeaderboardPanel.module.css';
 
@@ -21,7 +21,12 @@ export default function LeaderboardPanel({ dateKey, pendingScore, onClose }) {
 
   useEffect(() => { reload(); }, [reload]);
 
-  const qualifies = board && pendingScore && !outcome
+  const myRow = board && findMyRow(GAME_ID, board.rows);
+
+  // Already on today's board? Never re-prompt for initials, even if
+  // the board still has fewer than 10 entries (that alone doesn't
+  // mean YOU haven't already claimed your spot).
+  const qualifies = board && pendingScore && !outcome && !myRow
     && wouldQualify(pendingScore.score, board.rows, board.config);
 
   const handleSubmit = async (e) => {
@@ -70,7 +75,7 @@ export default function LeaderboardPanel({ dateKey, pendingScore, onClose }) {
           <ol className={styles.list}>
             {board.rows.length === 0 && <li className={styles.empty}>No scores yet today. Be the first.</li>}
             {board.rows.map((row, i) => (
-              <li key={`${row.initials}-${i}`} className={styles.row}>
+              <li key={`${row.initials}-${i}`} className={`${styles.row} ${row === myRow ? styles.rowMine : ''}`}>
                 <span className={styles.rank}>{i + 1}</span>
                 <span className={styles.initials}>{row.initials}</span>
                 <span className={styles.score}>{row.score_display}</span>
