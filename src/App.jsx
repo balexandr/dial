@@ -72,12 +72,9 @@ export default function App() {
 
   // Auto-opens the leaderboard (initials prompt included) a beat after
   // a qualifying win, instead of making the player click "today's
-  // leaderboard" to find out they made the cut — a live player lost
-  // that moment entirely the first time this shipped click-only.
-  // Delayed so it layers on top of the win screen's own "congrats"
-  // reveal rather than racing it; decoupled from that reveal's own
-  // timer so this stays identical across every game regardless of
-  // each one's own reveal-delay quirks.
+  // leaderboard" to find out they made the cut. Delay is independent
+  // of the win-screen reveal timer above, so it stays fixed regardless
+  // of each game's own reveal-delay value.
   useEffect(() => {
     if (gameStatus !== 'won') return;
     const t = setTimeout(() => {
