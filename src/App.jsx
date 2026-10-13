@@ -11,6 +11,7 @@ import { GameLogo } from './components/GameLogo';
 import { NoodleLogoIcon } from './components/NoodleLogo';
 import { recordTodayShare, getCompletedTodayCount, buildShareAllText, TOTAL_GAMES } from './utils/shareAll';
 import { toLeaderboardScore } from './utils/leaderboardScore';
+import { fetchTodayBoard, findMyRow, wouldQualify } from './utils/leaderboard';
 import { IconCheckmark, IconShare, IconLock, IconLeaderboard } from './components/Icons';
 
 const HOW_TO_PLAY_KEY = 'dial-how-to-play-seen';
@@ -67,6 +68,30 @@ export default function App() {
       recordGame(dateKey, elapsedSeconds);
       recordTodayShare('dial', dateKey, generateShareText());
     }
+  }, [gameStatus]);
+
+  // Auto-opens the leaderboard (initials prompt included) a beat after
+  // a qualifying win, instead of making the player click "today's
+  // leaderboard" to find out they made the cut — a live player lost
+  // that moment entirely the first time this shipped click-only.
+  // Delayed so it layers on top of the win screen's own "congrats"
+  // reveal rather than racing it; decoupled from that reveal's own
+  // timer so this stays identical across every game regardless of
+  // each one's own reveal-delay quirks.
+  useEffect(() => {
+    if (gameStatus !== 'won') return;
+    const t = setTimeout(() => {
+      const pending = toLeaderboardScore(elapsedSeconds);
+      fetchTodayBoard('dial', dateKey).then((board) => {
+        if (!board.config) return;
+        if (findMyRow('dial', board.rows)) return;
+        if (wouldQualify(pending.score, board.rows, board.config)) {
+          setShowLeaderboard(true);
+        }
+      });
+    }, 2000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStatus]);
 
   useEffect(() => {
