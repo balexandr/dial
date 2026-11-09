@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { IconSpin, IconBrain, IconLock } from './Icons';
+import { IconSpin, IconBrain, IconLock, IconBulb } from './Icons';
 import styles from './HowToPlay.module.css';
 
 // A tiny illustrative 4-letter example, purely for teaching the mechanic,
@@ -54,6 +54,13 @@ export default function HowToPlay({ onClose }) {
             <div>
               <p className={styles.stepTitle}>It solves itself</p>
               <p className={styles.stepDesc}>The puzzle locks in the instant every wheel shows the correct letter at once, no submit button, spin as much as you like.</p>
+            </div>
+          </div>
+          <div className={styles.step}>
+            <span className={styles.stepIcon}><IconBulb /></span>
+            <div>
+              <p className={styles.stepTitle}>Stuck on a longer day? Use a hint</p>
+              <p className={styles.stepDesc}>5- and 6-letter days get 1-2 hints. Each one locks in another wheel's correct letter, for 30 seconds added to your time.</p>
             </div>
           </div>
         </div>

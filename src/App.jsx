@@ -12,7 +12,7 @@ import { NoodleLogoIcon } from './components/NoodleLogo';
 import { recordTodayShare, getCompletedTodayCount, buildShareAllText, TOTAL_GAMES } from './utils/shareAll';
 import { toLeaderboardScore } from './utils/leaderboardScore';
 import { fetchTodayBoard, findMyRow, wouldQualify } from './utils/leaderboard';
-import { IconCheckmark, IconShare, IconLock, IconLeaderboard } from './components/Icons';
+import { IconCheckmark, IconShare, IconLock, IconLeaderboard, IconBulb } from './components/Icons';
 
 const HOW_TO_PLAY_KEY = 'dial-how-to-play-seen';
 
@@ -24,6 +24,9 @@ export default function App() {
     initialized,
     selections,
     gimmePos,
+    hintPositions,
+    maxHints,
+    useHint,
     rotateWheel,
     shuffleAll,
     gameStatus,
@@ -41,7 +44,13 @@ export default function App() {
   const [revealWin, setRevealWin] = useState(false);
   const [shareAllCount, setShareAllCount] = useState(0);
   const [shareAllCopied, setShareAllCopied] = useState(false);
+  const [hintFlashToken, setHintFlashToken] = useState(0);
   const currentYear = new Date().getFullYear();
+
+  const handleUseHint = () => {
+    useHint();
+    setHintFlashToken((t) => t + 1);
+  };
 
   // Let the wheels visibly lock into place (staggered color animation in
   // DialCryptex) before the win screen covers them, solving shouldn't
@@ -212,6 +221,24 @@ export default function App() {
             </svg>
             Shuffle
           </button>
+          {maxHints > 0 && (
+            <div className={styles.hintBlock}>
+              {hintFlashToken > 0 && (
+                // 30s matches HINT_PENALTY_SECONDS in useGameState.js.
+                <span key={hintFlashToken} className={styles.hintPenalty}>+30s</span>
+              )}
+              <button
+                type="button"
+                className={styles.hintButton}
+                onClick={handleUseHint}
+                disabled={gameStatus !== 'playing' || hintPositions.length >= maxHints}
+                aria-label="Use a hint: reveal one more wheel's letter"
+                title="Locks in one more wheel's correct letter. Adds 30s to your time."
+              >
+                <IconBulb size={15} /> Hint ({maxHints - hintPositions.length})
+              </button>
+            </div>
+          )}
         </div>
 
         <p className={styles.prompt}>Spin each wheel to spell the hidden word.</p>
@@ -222,11 +249,13 @@ export default function App() {
           onRotate={rotateWheel}
           gameStatus={gameStatus}
           gimmePos={gimmePos}
+          hintPositions={hintPositions}
         />
 
         {gameStatus === 'playing' && (
           <p className={styles.hint}>
             One wheel starts on its correct letter for free. Each of the rest only has a few letters on it, one of them is right. No penalty for spinning.
+            {maxHints > 0 && ' Stuck? Hint locks in one more wheel, for 30s on your time.'}
           </p>
         )}
       </main>

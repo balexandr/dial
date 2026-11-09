@@ -3,6 +3,16 @@ import puzzles from '../data/puzzles.json';
 
 const STORAGE_KEY = 'dial-game-state';
 const EPOCH = '2026-09-26';
+// Longer-word days get more hints: n=4 (Mon/Tue) gets none, n=5
+// (Wed-Fri) gets 1, n=6 (Sat/Sun) gets 2 — scales automatically with
+// WEEKLY_DIFFICULTY in the generator instead of hardcoding days here.
+const maxHintsForLength = (n) => Math.max(0, n - 4);
+// A hint instantly locks a wheel instead of making the player find it
+// themselves, so it has to cost something on the one scoring lever
+// Dial has (solve time, lower is better — see leaderboardScore.js).
+// Otherwise a stuck player could hint their way to a leaderboard time
+// that looks identical to someone who solved it for real.
+const HINT_PENALTY_SECONDS = 30;
 
 function getTodayKey() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
@@ -52,9 +62,13 @@ export function useGameState() {
   const puzzleNumber = Math.floor((new Date(dateKey) - new Date(EPOCH)) / 86400000) + 1;
   const fingerprint = puzzle ? contentFingerprint(puzzle) : null;
   const gimmePos = puzzle ? gimmePosForDate(dateKey, puzzle.n) : -1;
+  const maxHints = puzzle ? maxHintsForLength(puzzle.n) : 0;
 
   // Index into each wheel's ring array — the wheel's current letter.
   const [selections, setSelectionsState] = useState([]);
+  // Wheel positions locked via useHint (separate from the one free
+  // gimmePos wheel every puzzle starts with).
+  const [hintPositions, setHintPositions] = useState([]);
   const [gameStatus, setGameStatus] = useState('playing');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
@@ -80,9 +94,12 @@ export function useGameState() {
 
     const saved = loadState(dateKey, fingerprint);
     if (saved && saved.selections && saved.selections.length === puzzle.n) {
+      const restoredHints = (saved.hintPositions || []).filter((pos) => pos !== gimmePos && pos >= 0 && pos < puzzle.n);
       const restored = [...saved.selections];
       restored[gimmePos] = puzzle.solution[gimmePos];
+      restoredHints.forEach((pos) => { restored[pos] = puzzle.solution[pos]; });
       setSelectionsState(restored);
+      setHintPositions(restoredHints);
       setGameStatus(saved.gameStatus || 'playing');
       elapsedRef.current = saved.elapsedSeconds || 0;
       setElapsedSeconds(elapsedRef.current);
@@ -93,6 +110,7 @@ export function useGameState() {
       const fresh = new Array(puzzle.n).fill(0);
       fresh[gimmePos] = puzzle.solution[gimmePos];
       setSelectionsState(fresh);
+      setHintPositions([]);
     }
     setInitialized(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,8 +118,8 @@ export function useGameState() {
 
   useEffect(() => {
     if (!initialized || !puzzle) return;
-    saveState({ dateKey, fingerprint, selections, gameStatus, elapsedSeconds });
-  }, [selections, gameStatus, elapsedSeconds, initialized, dateKey, fingerprint, puzzle]);
+    saveState({ dateKey, fingerprint, selections, hintPositions, gameStatus, elapsedSeconds });
+  }, [selections, hintPositions, gameStatus, elapsedSeconds, initialized, dateKey, fingerprint, puzzle]);
 
   // Win check runs continuously, no submit button, same philosophy as
   // every other NoodleGame: the puzzle locks in the instant every wheel
@@ -121,7 +139,7 @@ export function useGameState() {
   // Rotate a wheel by +1/-1, wrapping around its ring. Free retry forever,
   // no fail state, no guess penalty — same as every other NoodleGame.
   const rotateWheel = useCallback((pos, direction) => {
-    if (gameStatus !== 'playing' || !puzzle || pos === gimmePos) return;
+    if (gameStatus !== 'playing' || !puzzle || pos === gimmePos || hintPositions.includes(pos)) return;
     setTimerRunning(true);
     setSelectionsState((prev) => {
       const next = [...prev];
@@ -129,7 +147,7 @@ export function useGameState() {
       next[pos] = ((next[pos] + direction) % size + size) % size;
       return next;
     });
-  }, [gameStatus, puzzle, gimmePos]);
+  }, [gameStatus, puzzle, gimmePos, hintPositions]);
 
   // Spin every wheel to a random letter at once, so a fresh puzzle doesn't
   // just show four identical "first letter" windows — gives the player a
@@ -138,9 +156,31 @@ export function useGameState() {
     if (gameStatus !== 'playing' || !puzzle) return;
     setTimerRunning(true);
     setSelectionsState((prev) => prev.map((val, pos) => (
-      pos === gimmePos ? val : Math.floor(Math.random() * puzzle.rings[pos].length)
+      pos === gimmePos || hintPositions.includes(pos) ? val : Math.floor(Math.random() * puzzle.rings[pos].length)
     )));
-  }, [gameStatus, puzzle, gimmePos]);
+  }, [gameStatus, puzzle, gimmePos, hintPositions]);
+
+  // Longer-word days (see maxHintsForLength) let a stuck player lock in
+  // one more wheel at a time, same no-fail philosophy as the rest of the
+  // suite's hint buttons — just paid for in solve time instead of a
+  // separate counter, since solve time is the only thing Dial's
+  // leaderboard actually ranks on.
+  const useHint = useCallback(() => {
+    if (!puzzle || gameStatus !== 'playing' || hintPositions.length >= maxHints) return;
+    const target = puzzle.solution.findIndex((idx, pos) => (
+      pos !== gimmePos && !hintPositions.includes(pos) && selections[pos] !== idx
+    ));
+    if (target === -1) return;
+    setTimerRunning(true);
+    setSelectionsState((prev) => {
+      const next = [...prev];
+      next[target] = puzzle.solution[target];
+      return next;
+    });
+    setHintPositions((prev) => [...prev, target]);
+    elapsedRef.current += HINT_PENALTY_SECONDS;
+    setElapsedSeconds(elapsedRef.current);
+  }, [puzzle, gameStatus, hintPositions, maxHints, gimmePos, selections]);
 
   const generateShareText = useCallback(() => {
     if (!puzzle || gameStatus !== 'won') return '';
@@ -156,6 +196,9 @@ export function useGameState() {
     initialized,
     selections,
     gimmePos,
+    hintPositions,
+    maxHints,
+    useHint,
     rotateWheel,
     shuffleAll,
     gameStatus,

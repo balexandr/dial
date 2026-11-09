@@ -140,6 +140,61 @@
   display: block;
 }
 
+.hintBlock {
+  position: relative;
+  display: flex;
+}
+
+.hintButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 45%, transparent);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hintButton:not(:disabled):hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+  }
+}
+
+.hintButton:not(:disabled):active {
+  transform: scale(0.94);
+}
+
+.hintButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.hintPenalty {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--wrong);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: hintPenaltyFloat 1.1s ease-out forwards;
+}
+
+@keyframes hintPenaltyFloat {
+  0%   { opacity: 0; transform: translate(-50%, 6px) scale(0.9); }
+  20%  { opacity: 1; transform: translate(-50%, -4px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -22px) scale(1); }
+}
+
 .timerBlock {
   display: flex;
   flex-direction: column;

@@ -28,6 +28,15 @@ export function IconBrain({ size = 20, ...props }) {
   );
 }
 
+export function IconBulb({ size = 20, ...props }) {
+  return (
+    <svg width={size} height={size} {...base(props)}>
+      <path d="M12 3a6.5 6.5 0 0 0-3.8 11.8c.6.45 1 1.17 1 1.95V18h5.6v-1.25c0-.78.4-1.5 1-1.95A6.5 6.5 0 0 0 12 3Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M9.6 21h4.8M10.2 18.6h3.6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconLock({ size = 20, ...props }) {
   return (
     <svg width={size} height={size} {...base(props)}>
